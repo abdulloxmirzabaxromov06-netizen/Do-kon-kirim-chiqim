@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Royal Taxi Pro App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .screen { display: none; }
+    .active { display: block; }
+  </style>
+</head>
+<body class="bg-black">
+
+<div class="max-w-sm mx-auto min-h-screen bg-gradient-to-b from-black to-gray-900 text-white relative overflow-hidden shadow-2xl">
+
+  <!-- ===== MAP (ALWAYS VISIBLE TOP) ===== -->
+  <div class="h-52 bg-gray-800 relative">
+    <div class="absolute inset-0 bg-[url('https://maps.gstatic.com/tactile/basepage/pegman_sherlock.png')] opacity-10"></div>
+    <div class="absolute top-4 left-4">
+      <h1 class="text-2xl font-bold text-yellow-400">1018</h1>
+      <p class="text-xs text-gray-300">Live Map Tracking</p>
+    </div>
+  </div>
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div id="home" class="screen active p-4 pb-24">
+    <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black rounded-3xl p-5 shadow-xl mb-4">
+      <h2 class="text-xl font-bold"><i class="fa-solid fa-crown"></i> Premium Taxi Xizmati</h2>
+      <p class="text-sm font-medium">24/7 Professional Service</p>
+    </div>
+
+    <div class="bg-gray-900 border border-yellow-500/20 rounded-3xl p-4 shadow-lg">
+      <h3 class="font-semibold mb-3"><i class="fa-solid fa-location-dot"></i> Buyurtma berish</h3>
+
+      <input id="pickup" type="text" placeholder="Qayerdan (Pickup)"
+        class="w-full mb-3 p-3 rounded-xl bg-black border border-gray-700 focus:border-yellow-400 outline-none" />
+
+      <input id="destination" type="text" placeholder="Qayerga (Destination)"
+        class="w-full p-3 rounded-xl bg-black border border-gray-700 focus:border-yellow-400 outline-none" />
+
+      <button onclick="createOrder()"
+        class="w-full mt-4 bg-yellow-400 text-black py-3 rounded-xl font-bold hover:scale-105 transition">
+        <i class="fa-solid fa-taxi"></i> Taxi chaqirish
+      </button>
+    </div>
+
+    <!-- Taxi Types -->
+    <div class="mt-5 space-y-3">
+      <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 flex justify-between">
+        <div>
+          <p class="font-bold">Ekonom</p>
+          <p class="text-xs text-gray-400">Arzon va tez</p>
+        </div>
+        <p class="text-yellow-400 font-bold">10 000 so'm</p>
+      </div>
+
+      <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 flex justify-between">
+        <div>
+          <p class="font-bold">Komfort</p>
+          <p class="text-xs text-gray-400">Qulay</p>
+        </div>
+        <p class="text-yellow-400 font-bold">18 000 so'm</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ORDERS SCREEN (SEPARATE) ===== -->
+  <div id="orders" class="screen p-4 pb-24">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold"><i class="fa-solid fa-list"></i> Buyurtmalar</h2>
+      <span id="driverStatus" class="text-xs bg-green-500 px-2 py-1 rounded-full">Bo'sh</span>
+    </div>
+
+    <div id="ordersList" class="space-y-3">
+      <p class="text-gray-500 text-sm">Hozircha buyurtma yo'q...</p>
+    </div>
+  </div>
+
+  <!-- ===== DRIVER ACTIVE RIDE ===== -->
+  <div id="activeRide" class="screen p-4 pb-24">
+    <div class="bg-gray-900 rounded-3xl p-5 border border-yellow-500/20">
+      <h2 class="text-xl font-bold mb-2"><i class="fa-solid fa-car"></i> Safar davom etmoqda</h2>
+      <p id="rideClient" class="text-sm text-gray-300"></p>
+      <p id="rideLocation" class="text-sm text-gray-400 mb-4"></p>
+
+      <button onclick="finishRide()"
+        class="w-full bg-green-500 py-3 rounded-xl font-bold">
+        <i class="fa-solid fa-check"></i> Mijozni olib bordim
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN PANEL (ONLY ADMIN ADDS ORDERS) ===== -->
+  <div id="admin" class="screen p-4 pb-24">
+    <h2 class="text-xl font-bold mb-4"><i class="fa-solid fa-user-shield"></i> Admin Panel</h2>
+
+    <div class="bg-gray-900 p-4 rounded-3xl border border-yellow-500/20">
+      <input id="adminName" type="text" placeholder="Mijoz nomi"
+        class="w-full mb-3 p-3 rounded-xl bg-black border border-gray-700" />
+
+      <input id="adminPhone" type="text" placeholder="Telefon raqami"
+        class="w-full mb-3 p-3 rounded-xl bg-black border border-gray-700" />
+
+      <input id="adminLocation" type="text" placeholder="Location (Manzil)"
+        class="w-full p-3 rounded-xl bg-black border border-gray-700" />
+
+      <button onclick="adminAddOrder()"
+        class="w-full mt-4 bg-yellow-400 text-black py-3 rounded-xl font-bold">
+        <i class="fa-solid fa-plus"></i> Admin buyurtma qo'shish
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="absolute bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-4 text-xs">
+    <button onclick="showScreen('home')" class="flex flex-col items-center text-yellow-400">
+      <i class="fa-solid fa-house text-lg"></i>
+      <span>Home</span>
+    </button>
+
+    <button onclick="showScreen('orders')" class="flex flex-col items-center">
+      <i class="fa-solid fa-clipboard-list text-lg"></i>
+      <span>Buyurtma</span>
+    </button>
+
+    <button onclick="showScreen('activeRide')" class="flex flex-col items-center">
+      <i class="fa-solid fa-route text-lg"></i>
+      <span>Safar</span>
+    </button>
+
+    <button onclick="showScreen('admin')" class="flex flex-col items-center">
+      <i class="fa-solid fa-user-shield text-lg"></i>
+      <span>Admin</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  let orders = [];
+  let driverBusy = false;
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(screen => {
+      screen.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updateOrdersUI() {
+    const list = document.getElementById('ordersList');
+    if (orders.length === 0) {
+      list.innerHTML = '<p class="text-gray-500 text-sm">Hozircha buyurtma yo\'q...</p>';
+      return;
+    }
+
+    list.innerHTML = '';
+
+    orders.forEach((order, index) => {
+      if (order.taken) return;
+
+      const card = document.createElement('div');
+      card.className = 'bg-gray-900 p-4 rounded-2xl border border-gray-800';
+      card.innerHTML = `
+        <p class="font-bold"><i class="fa-solid fa-user"></i> ${order.name}</p>
+        <p class="text-sm text-gray-400"><i class="fa-solid fa-phone"></i> ${order.phone}</p>
+        <p class="text-sm text-gray-500"><i class="fa-solid fa-location-dot"></i> ${order.location}</p>
+        <button onclick="takeOrder(${index})"
+          class="w-full mt-3 bg-yellow-400 text-black py-2 rounded-xl font-bold">
+          Qabul qilish
+        </button>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function adminAddOrder() {
+    const name = document.getElementById('adminName').value;
+    const phone = document.getElementById('adminPhone').value;
+    const location = document.getElementById('adminLocation').value;
+
+    if (!name || !phone || !location) {
+      alert('Barcha maydonlarni to\'ldiring (Admin)!');
+      return;
+    }
+
+    orders.push({ name, phone, location, taken: false });
+    updateOrdersUI();
+    alert('Admin buyurtma qo\'shdi!');
+  }
+
+  function createOrder() {
+    alert('Buyurtma faqat Admin tomonidan qo\'shiladi!');
+  }
+
+  function takeOrder(index) {
+    if (driverBusy) {
+      alert('Avvalgi mijozni olib boring!');
+      return;
+    }
+
+    const order = orders[index];
+    order.taken = true;
+    driverBusy = true;
+
+    document.getElementById('rideClient').textContent = 'Mijoz: ' + order.name + ' | ' + order.phone;
+    document.getElementById('rideLocation').textContent = 'Manzil: ' + order.location;
+    document.getElementById('driverStatus').textContent = 'Band';
+    document.getElementById('driverStatus').className = 'text-xs bg-red-500 px-2 py-1 rounded-full';
+
+    showScreen('activeRide');
+    updateOrdersUI();
+  }
+
+  function finishRide() {
+    driverBusy = false;
+    document.getElementById('driverStatus').textContent = "Bo'sh";
+    document.getElementById('driverStatus').className = 'text-xs bg-green-500 px-2 py-1 rounded-full';
+    showScreen('orders');
+  }
+</script>
+
+</body>
+</html>
